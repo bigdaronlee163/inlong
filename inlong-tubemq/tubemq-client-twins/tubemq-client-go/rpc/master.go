@@ -19,6 +19,8 @@ package rpc
 
 import (
 	"context"
+	"github.com/apache/inlong/inlong-tubemq/tubemq-client-twins/tubemq-client-go/pub"
+	"github.com/apache/inlong/inlong-tubemq/tubemq-client-twins/tubemq-client-go/tdmsg"
 
 	"github.com/golang/protobuf/proto"
 
@@ -195,4 +197,57 @@ func (c *rpcClient) CloseRequestC2M(ctx context.Context, metadata *metadata.Meta
 		return nil, errs.New(errs.RetUnMarshalFailure, err.Error())
 	}
 	return rspM2C, nil
+}
+
+func (c *rpcClient) RegisterRequestP2M(ctx context.Context, metadata *metadata.Metadata) (
+	*protocol.RegisterResponseM2P, error) {
+	panic("im")
+}
+
+// HeartRequestP2M implements the HeartRequestP2M interface according to TubeMQ RPC protocol.
+func (c *rpcClient) HeartRequestP2M(ctx context.Context, metadata *metadata.Metadata) (
+	*protocol.HeartResponseM2P, error) {
+	panic("im")
+}
+
+// CloseRequestP2M implements the CloseRequestP2M interface according to TubeMQ RPC protocol.
+func (c *rpcClient) CloseRequestP2M(ctx context.Context, metadata *metadata.Metadata,
+) (*protocol.CloseResponseM2P, error) {
+	panic("im")
+}
+
+func (c *rpcClient) SendMessageP2B(ctx context.Context, metadata *metadata.Metadata, pub *pub.PubInfo, partition *metadata.Partition,
+	message *tdmsg.Message) (*protocol.SendMessageResponseB2P, error) {
+	//panic("im")
+	// 代表producer到broker的请求。
+	reqPCB := &protocol.SendMessageRequestP2B{
+		ClientId:    proto.String(pub.GetClientID()), // 需要关联到producer暂时未实现
+		TopicName:   proto.String(pub.GetTopics()),
+		PartitionId: proto.Int32(pub.GetPartitionId()),
+	}
+	// 构造rpc请求，rpc请求头，rpc请求体。
+	req := codec.NewRPCRequest()
+	req.RpcHeader = &protocol.RpcConnHeader{
+		Flag: proto.Int32(0),
+	}
+	req.RequestHeader = &protocol.RequestHeader{
+		ServiceType: proto.Int32(brokerService),
+		ProtocolVer: proto.Int32(2),
+	}
+	req.RequestBody = &protocol.RequestBody{
+		Method:  proto.Int32(brokerProducerSendMsg),
+		Timeout: proto.Int64(c.config.Net.ReadTimeout.Milliseconds()),
+	}
+	req.Body = reqPCB // 作为rpc的请求体。
+
+	rspBody, err := c.doRequest(ctx, metadata.GetNode().GetAddress(), req)
+	if err != nil {
+		return nil, err
+	}
+	rspB2P := &protocol.SendMessageResponseB2P{}
+	err = proto.Unmarshal(rspBody.Data, rspB2P)
+	if err != nil {
+		return nil, errs.New(errs.RetUnMarshalFailure, err.Error())
+	}
+	return rspB2P, nil // todo
 }

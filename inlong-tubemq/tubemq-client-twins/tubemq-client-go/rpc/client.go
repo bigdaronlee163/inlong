@@ -20,6 +20,8 @@ package rpc
 
 import (
 	"context"
+	"github.com/apache/inlong/inlong-tubemq/tubemq-client-twins/tubemq-client-go/pub"
+	"github.com/apache/inlong/inlong-tubemq/tubemq-client-twins/tubemq-client-go/tdmsg"
 
 	"github.com/apache/inlong/inlong-tubemq/tubemq-client-twins/tubemq-client-go/codec"
 	"github.com/apache/inlong/inlong-tubemq/tubemq-client-twins/tubemq-client-go/config"
@@ -35,10 +37,22 @@ import (
 const (
 	masterService     = 1
 	brokerReadService = 2
+	brokerService     = 3
 )
 
 // RPCClient is the rpc level client to interact with TubeMQ.
 type RPCClient interface {
+	RegisterRequestP2M(ctx context.Context, metadata *metadata.Metadata) (
+		*protocol.RegisterResponseM2P, error)
+
+	HeartRequestP2M(ctx context.Context, metadata *metadata.Metadata) (
+		*protocol.HeartResponseM2P, error)
+
+	CloseRequestP2M(ctx context.Context, metadata *metadata.Metadata,
+	) (*protocol.CloseResponseM2P, error)
+
+	SendMessageP2B(ctx context.Context, metadata *metadata.Metadata, pub *pub.PubInfo, partition *metadata.Partition,
+		message *tdmsg.Message) (*protocol.SendMessageResponseB2P, error)
 	// RegisterRequestC2B is the rpc request for a consumer to register to a broker.
 	RegisterRequestC2B(ctx context.Context, metadata *metadata.Metadata, sub *sub.SubInfo,
 		r *remote.RmtDataCache) (*protocol.RegisterResponseB2C, error)

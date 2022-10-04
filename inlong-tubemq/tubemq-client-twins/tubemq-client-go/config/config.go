@@ -132,6 +132,14 @@ type Config struct {
 		// AfterFail is the heartbeat timeout after a heartbeat failure.
 		AfterFail time.Duration
 	}
+
+	Producer struct {
+		// Masters is the addresses of master.
+		Masters string
+	}
+
+	Heartbeat4P struct {
+	}
 }
 
 // NewDefaultConfig returns a default config of the client.
