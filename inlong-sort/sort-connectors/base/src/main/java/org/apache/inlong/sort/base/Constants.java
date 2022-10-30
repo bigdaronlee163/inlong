@@ -20,6 +20,7 @@ package org.apache.inlong.sort.base;
 
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.ConfigOptions;
+import org.apache.inlong.sort.base.sink.SchemaUpdateExceptionPolicy;
 
 /**
  * connector base option constant
@@ -85,27 +86,6 @@ public final class Constants {
 
     public static final String INLONG_METRIC_STATE_NAME = "inlong-metric-states";
 
-    public static final ConfigOption<String> INLONG_METRIC =
-        ConfigOptions.key("inlong.metric.labels")
-            .stringType()
-            .noDefaultValue()
-            .withDescription("INLONG metric labels, format is 'key1=value1&key2=value2',"
-                    + "default is 'groupId=xxx&streamId=xxx&nodeId=xxx'");
-
-    public static final ConfigOption<String> INLONG_AUDIT =
-        ConfigOptions.key("metrics.audit.proxy.hosts")
-            .stringType()
-            .noDefaultValue()
-            .withDescription("Audit proxy host address for reporting audit metrics. \n"
-                    + "e.g. 127.0.0.1:10081,0.0.0.1:10081");
-
-    public static final ConfigOption<Boolean> IGNORE_ALL_CHANGELOG =
-            ConfigOptions.key("sink.ignore.changelog")
-                    .booleanType()
-                    .defaultValue(false)
-                    .withDescription("Regard upsert delete as insert kind.");
-
-
     /**
      * It is used for jdbc url filter for avoiding url attack
      * see also in https://su18.org/post/jdbc-connection-url-attack/
@@ -116,4 +96,71 @@ public final class Constants {
 
     public static final String AUTO_DESERIALIZE_FALSE = "autoDeserialize=false";
 
+    public static final ConfigOption<String> INLONG_METRIC =
+            ConfigOptions.key("inlong.metric.labels")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription("INLONG metric labels, format is 'key1=value1&key2=value2',"
+                            + "default is 'groupId=xxx&streamId=xxx&nodeId=xxx'");
+
+    public static final ConfigOption<String> INLONG_AUDIT =
+            ConfigOptions.key("metrics.audit.proxy.hosts")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription("Audit proxy host address for reporting audit metrics. \n"
+                            + "e.g. 127.0.0.1:10081,0.0.0.1:10081");
+
+    public static final ConfigOption<Boolean> IGNORE_ALL_CHANGELOG =
+            ConfigOptions.key("sink.ignore.changelog")
+                    .booleanType()
+                    .defaultValue(false)
+                    .withDescription("Regard upsert delete as insert kind.");
+
+    public static final ConfigOption<String> SINK_MULTIPLE_FORMAT =
+            ConfigOptions.key("sink.multiple.format")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription(
+                            "The format of multiple sink, it represents the real format of the raw binary data");
+
+    public static final ConfigOption<String> SINK_MULTIPLE_DATABASE_PATTERN =
+            ConfigOptions.key("sink.multiple.database-pattern")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription("The option 'sink.multiple.database-pattern' "
+                            + "is used extract database name from the raw binary data, "
+                            + "this is only used in the multiple sink writing scenario.");
+
+    public static final ConfigOption<Boolean> SOURCE_MULTIPLE_ENABLE =
+            ConfigOptions.key("source.multiple.enable")
+                    .booleanType()
+                    .defaultValue(false)
+                    .withDescription("Whether enable migrate multiple databases");
+
+    public static final ConfigOption<String> SINK_MULTIPLE_TABLE_PATTERN =
+            ConfigOptions.key("sink.multiple.table-pattern")
+                    .stringType()
+                    .noDefaultValue()
+                    .withDescription("The option 'sink.multiple.table-pattern' "
+                            + "is used extract table name from the raw binary data, "
+                            + "this is only used in the multiple sink writing scenario.");
+
+    public static final ConfigOption<Boolean> SINK_MULTIPLE_ENABLE =
+            ConfigOptions.key("sink.multiple.enable")
+                    .booleanType()
+                    .defaultValue(false)
+                    .withDescription("The option 'sink.multiple.enable' "
+                            + "is used to determine whether to support multiple sink writing, default is 'false'.");
+
+    public static final ConfigOption<SchemaUpdateExceptionPolicy> SINK_MULTIPLE_SCHEMA_UPDATE_POLICY =
+            ConfigOptions.key("sink.multiple.schema-update.policy")
+                    .enumType(SchemaUpdateExceptionPolicy.class)
+                    .defaultValue(SchemaUpdateExceptionPolicy.TRY_IT_BEST)
+                    .withDescription("The action to deal with schema update in multiple sink.");
+
+    public static final ConfigOption<Boolean> SINK_MULTIPLE_IGNORE_SINGLE_TABLE_ERRORS =
+            ConfigOptions.key("sink.multiple.ignore-single-table-errors")
+                    .booleanType()
+                    .defaultValue(true)
+                    .withDescription("Whether ignore the single table erros when multiple sink writing scenario.");
 }

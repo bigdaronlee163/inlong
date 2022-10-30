@@ -54,6 +54,14 @@ public interface Metadata {
             case OP_TS:
                 metadataKey = "op_ts";
                 break;
+            case DATA:
+            case DATA_BYTES:
+                metadataKey = "meta.data";
+                break;
+            case DATA_CANAL:
+            case DATA_BYTES_CANAL:
+                metadataKey = "meta.data_canal";
+                break;
 
             default:
                 throw new UnsupportedOperationException(String.format("Unsupport meta field for %s: %s",
@@ -76,9 +84,11 @@ public interface Metadata {
         String metadataType;
         switch (metaField) {
             case TABLE_NAME:
-            case DATA:
             case DATABASE_NAME:
             case OP_TYPE:
+            case DATA_CANAL:
+            case DATA:
+            case DATA_DEBEZIUM:
             case COLLECTION_NAME:
             case SCHEMA_NAME:
                 metadataType = "STRING";
@@ -104,6 +114,11 @@ public interface Metadata {
                 break;
             case UPDATE_BEFORE:
                 metadataType = "ARRAY<MAP<STRING, STRING>>";
+                break;
+            case DATA_BYTES:
+            case DATA_BYTES_DEBEZIUM:
+            case DATA_BYTES_CANAL:
+                metadataType = "BYTES";
                 break;
             default:
                 throw new UnsupportedOperationException(String.format("Unsupport meta field for %s: %s",

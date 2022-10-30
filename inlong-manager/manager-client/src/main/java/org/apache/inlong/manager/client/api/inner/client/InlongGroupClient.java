@@ -21,6 +21,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.inlong.manager.client.api.ClientConfiguration;
 import org.apache.inlong.manager.client.api.service.InlongGroupApi;
+import org.apache.inlong.manager.client.api.service.InlongSortApi;
 import org.apache.inlong.manager.client.api.util.ClientUtils;
 import org.apache.inlong.manager.common.enums.SimpleGroupStatus;
 import org.apache.inlong.manager.common.util.JsonUtils;
@@ -34,9 +35,13 @@ import org.apache.inlong.manager.pojo.group.InlongGroupPageRequest;
 import org.apache.inlong.manager.pojo.group.InlongGroupRequest;
 import org.apache.inlong.manager.pojo.group.InlongGroupResetRequest;
 import org.apache.inlong.manager.pojo.group.InlongGroupTopicInfo;
+import org.apache.inlong.manager.pojo.sort.SortStatusInfo;
+import org.apache.inlong.manager.pojo.sort.SortStatusRequest;
 import org.apache.inlong.manager.pojo.workflow.WorkflowResult;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import retrofit2.Call;
+
+import java.util.List;
 
 import static org.apache.inlong.manager.client.api.impl.InlongGroupImpl.MQ_FIELD;
 import static org.apache.inlong.manager.client.api.impl.InlongGroupImpl.MQ_FIELD_OLD;
@@ -47,9 +52,11 @@ import static org.apache.inlong.manager.client.api.impl.InlongGroupImpl.MQ_FIELD
 public class InlongGroupClient {
 
     private final InlongGroupApi inlongGroupApi;
+    private final InlongSortApi inlongSortApi;
 
     public InlongGroupClient(ClientConfiguration configuration) {
         inlongGroupApi = ClientUtils.createRetrofit(configuration).create(InlongGroupApi.class);
+        inlongSortApi = ClientUtils.createRetrofit(configuration).create(InlongSortApi.class);
     }
 
     /**
@@ -134,6 +141,18 @@ public class InlongGroupClient {
     public PageResult<InlongGroupBriefInfo> listGroups(InlongGroupPageRequest pageRequest) {
         Response<PageResult<InlongGroupBriefInfo>> response = ClientUtils.executeHttpCall(
                 inlongGroupApi.listGroups(pageRequest));
+        ClientUtils.assertRespSuccess(response);
+        return response.getData();
+    }
+
+    /**
+     * List sort task status for inlong groups
+     *
+     * @param request sort status request
+     * @return list of sort status infos
+     */
+    public List<SortStatusInfo> listSortStatus(SortStatusRequest request) {
+        Response<List<SortStatusInfo>> response = ClientUtils.executeHttpCall(inlongSortApi.listStatus(request));
         ClientUtils.assertRespSuccess(response);
         return response.getData();
     }

@@ -267,10 +267,16 @@
             <if test="streamId != null and streamId != ''">
                 and inlong_stream_id = #{streamId, jdbcType=VARCHAR}
             </if>
-            <if test="sinkName != null and sinkName != ''">
-                and sink_name = #{sinkName, jdbcType=VARCHAR}
-            </if>
         </where>
+    </select>
+    <select id="selectByUniqueKey" resultType="org.apache.inlong.manager.dao.entity.StreamSinkEntity">
+        select
+        <include refid="Base_Column_List"/>
+        from stream_sink
+        where is_deleted = 0
+        and inlong_group_id = #{groupId, jdbcType=VARCHAR}
+        and inlong_stream_id = #{streamId, jdbcType=VARCHAR}
+        and sink_name = #{sinkName, jdbcType=VARCHAR}
     </select>
     <select id="selectByIdAndType" resultType="org.apache.inlong.manager.dao.entity.StreamSinkEntity">
         select
@@ -344,6 +350,12 @@
             </if>
         </where>
     </select>
+    <select id="selectAllStreamSinks" resultType="org.apache.inlong.manager.dao.entity.StreamSinkEntity">
+        select
+        <include refid="Base_Column_List"/>
+        from stream_sink
+        where is_deleted = 0
+    </select>
     <select id="selectAllTasks" resultType="org.apache.inlong.manager.pojo.sort.standalone.SortTaskInfo">
         select inlong_cluster_name as sortClusterName,
                sort_task_name,
@@ -362,7 +374,7 @@
         from stream_sink
         where is_deleted = 0
     </select>
-    <select id="selectAllStreams" resultType="org.apache.inlong.manager.pojo.sort.standalone.SortSourceStreamInfo">
+    <select id="selectAllStreams" resultType="org.apache.inlong.manager.pojo.sort.standalone.SortSourceStreamSinkInfo">
         select inlong_cluster_name as sortClusterName,
                sort_task_name,
                inlong_group_id     as groupId,
@@ -433,9 +445,17 @@
         where id = #{id,jdbcType=INTEGER}
     </update>
 
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    <delete id="deleteById" parameterType="java.lang.Integer">
         delete
         from stream_sink
         where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <delete id="deleteByInlongGroupIds">
+        delete
+        from stream_sink
+        where inlong_group_id in
+        <foreach item="item" index="index" collection="groupIdList" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
     </delete>
 </mapper>

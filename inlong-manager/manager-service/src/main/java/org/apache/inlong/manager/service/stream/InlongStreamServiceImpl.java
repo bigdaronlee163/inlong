@@ -146,6 +146,8 @@ public class InlongStreamServiceImpl implements InlongStreamService {
         streamInfo.setExtList(exts);
         List<StreamSink> sinkList = sinkService.listSink(groupId, streamId);
         streamInfo.setSinkList(sinkList);
+        List<StreamSource> sourceList = sourceService.listSource(groupId, streamId);
+        streamInfo.setSourceList(sourceList);
         LOGGER.info("success to get inlong stream for groupId={}", groupId);
         return streamInfo;
     }
@@ -175,6 +177,8 @@ public class InlongStreamServiceImpl implements InlongStreamService {
             streamInfo.setExtList(extInfos);
             List<StreamSink> sinkList = sinkService.listSink(groupId, streamId);
             streamInfo.setSinkList(sinkList);
+            List<StreamSource> sourceList = sourceService.listSource(groupId, streamId);
+            streamInfo.setSourceList(sourceList);
         });
         return streamList;
     }
@@ -423,7 +427,7 @@ public class InlongStreamServiceImpl implements InlongStreamService {
         Preconditions.checkNotNull(groupId, ErrorCodeEnum.GROUP_ID_IS_EMPTY.getMessage());
 
         List<InlongStreamBriefInfo> topicList = streamMapper.selectBriefList(groupId);
-        LOGGER.debug("success to get topic list by groupId={}", groupId);
+        LOGGER.debug("success to get topic list by groupId={}, result size={}", groupId, topicList.size());
         return topicList;
     }
 

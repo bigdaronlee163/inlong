@@ -34,6 +34,7 @@ import org.apache.inlong.manager.client.api.inner.client.InlongGroupClient;
 import org.apache.inlong.manager.client.api.util.ClientUtils;
 import org.apache.inlong.manager.common.enums.SimpleGroupStatus;
 import org.apache.inlong.manager.common.enums.SimpleSourceStatus;
+import org.apache.inlong.manager.common.enums.SortStatus;
 import org.apache.inlong.manager.common.util.HttpUtils;
 import org.apache.inlong.manager.common.util.Preconditions;
 import org.apache.inlong.manager.pojo.cluster.BindTagRequest;
@@ -50,6 +51,8 @@ import org.apache.inlong.manager.pojo.group.InlongGroupBriefInfo;
 import org.apache.inlong.manager.pojo.group.InlongGroupInfo;
 import org.apache.inlong.manager.pojo.group.InlongGroupPageRequest;
 import org.apache.inlong.manager.pojo.group.InlongGroupStatusInfo;
+import org.apache.inlong.manager.pojo.sort.SortStatusInfo;
+import org.apache.inlong.manager.pojo.sort.SortStatusRequest;
 import org.apache.inlong.manager.pojo.source.StreamSource;
 
 import java.util.List;
@@ -129,6 +132,7 @@ public class InlongClientImpl implements InlongClient {
 
         PageResult<InlongGroupBriefInfo> pageInfo = groupClient.listGroups(request);
         List<InlongGroupBriefInfo> briefInfos = pageInfo.getList();
+
         Map<String, InlongGroupStatusInfo> groupStatusMap = Maps.newHashMap();
         if (CollectionUtils.isNotEmpty(briefInfos)) {
             briefInfos.forEach(briefInfo -> {
@@ -144,6 +148,26 @@ public class InlongClientImpl implements InlongClient {
                 groupStatusMap.put(groupId, statusInfo);
             });
         }
+        return groupStatusMap;
+    }
+
+    @Override
+    public Map<String, InlongGroupStatusInfo> listGroupStatus(List<String> groupIds, String credentials) {
+        Map<String, InlongGroupStatusInfo> groupStatusMap = listGroupStatus(groupIds);
+
+        // sort status info
+        SortStatusRequest statusRequest = new SortStatusRequest();
+        statusRequest.setInlongGroupIds(groupIds);
+        statusRequest.setCredentials(credentials);
+        List<SortStatusInfo> sortStatusInfos = groupClient.listSortStatus(statusRequest);
+
+        if (CollectionUtils.isNotEmpty(sortStatusInfos)) {
+            Map<String, SortStatus> sortStatusMap = sortStatusInfos.stream()
+                    .collect(Collectors.toMap(SortStatusInfo::getInlongGroupId, SortStatusInfo::getSortStatus));
+            groupStatusMap.forEach((groupId, groupStatusInfo) ->
+                    groupStatusInfo.setSortStatus(sortStatusMap.getOrDefault(groupId, SortStatus.NOT_EXISTS)));
+        }
+
         return groupStatusMap;
     }
 
@@ -239,8 +263,15 @@ public class InlongClientImpl implements InlongClient {
 
     @Override
     public PageResult<ClusterNodeResponse> listNode(ClusterPageRequest request) {
-        Preconditions.checkNotNull(request.getParentId(), "Cluster id cannot be empty");
+        Preconditions.checkNotNull(request.getParentId(), "parentId cannot be empty");
         return clusterClient.listNode(request);
+    }
+
+    @Override
+    public List<ClusterNodeResponse> listNode(String inlongGroupId, String clusterType, String protocolType) {
+        Preconditions.checkNotNull(inlongGroupId, "inlongGroupId cannot be empty");
+        Preconditions.checkNotNull(clusterType, "clusterType cannot be empty");
+        return clusterClient.listNode(inlongGroupId, clusterType, protocolType);
     }
 
     @Override
